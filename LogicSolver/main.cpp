@@ -3,6 +3,7 @@
 #include <cctype>
 #include <algorithm>
 #include <stack>
+#include <limits>
 
 enum class TokenType {
     START,
@@ -200,7 +201,9 @@ bool evaluatePostfix(const std::string& postfix, const bool varValues[26]) {
     return valStack.top();
 }
 
-void printTruthTable(const std::string& expr) {
+std::string printTruthTable(const std::string& expr) {
+    std::string truthVal = ""; // For comparison between expressions
+
     std::string vars = getUniqueVars(expr);
     std::string postfix = infixToPostfix(expr);
     int numVars = vars.length();
@@ -235,13 +238,16 @@ void printTruthTable(const std::string& expr) {
 
         bool result = evaluatePostfix(postfix, varValues);
         std::cout << centerPad << colorBit(result) << "\n";
+
+        truthVal += (result ? "1" : "0");
     }
     // Print Divider Line
     std::cout << std::string(totalWidth, '-') << "\n\n";
+
+    return truthVal;
 }
 
-
-int main() {
+std::string getInput() {
     std::string expr;
 
     std::cout << "\n" << "\033[37mEnter a Logical Expression\033[0m\n"
@@ -255,13 +261,34 @@ int main() {
         }
         std::cout << "\nPlease try again:\n";
     }
-
+    
     // Ensure we didn't exit the loop due to an unexpected EOF/closed input stream
     if (std::cin) {
-        std::cout << "Generating expression's truth table for: " << expr << "\n\n";
+        std::cout << "\nGenerating expression's truth table for: " << expr << "\n\n";
     }
+    return expr;
+}
 
-    printTruthTable(expr);
+
+int main() {
+    std::string expr = getInput();
+    std::string expr1val = printTruthTable(expr);
+
+    std::string expr2;
+    std::string expr2val;
+
+    std::cout << "\n\033[37mWould you like to comapre to another expression? (y/n):\033[0m ";
+    std::string response;
+    std::cin >> response;
+
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    if (response == "y") {
+        expr2 = getInput();
+        expr2val = printTruthTable(expr2);
+
+        if (expr1val == expr2val) std::cout << "\n\033[32mBoth Logical Expressions are Logically Equivalent!\033[0m\n\n";
+    }
 
     return 0;
 }
